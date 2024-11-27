@@ -1,11 +1,23 @@
-const CAR = '`ō͡≡≡o˞̶ ';
+const BUILDING_REPEAT = 5;
+
+let _frameLine1 =  repeat(' _______                ', BUILDING_REPEAT);
+let _frameLine2 =  repeat('/_▱__▱_/|____           ', BUILDING_REPEAT);
+let _frameLine3 =  repeat('| ▦  ▦ ||___/|   ______ ', BUILDING_REPEAT);
+let _frameLine4 =  repeat('| ▦  ▦ ||▪ _||__/_____/|', BUILDING_REPEAT);
+let _frameLine5 =  repeat('| ▦  ▦ ||▪/_____/|▦  ▦||', BUILDING_REPEAT);
+let _frameLine6 = repeat('| ▦  ▦ ||▪| ▦ ▦ ||▦  ▦||', BUILDING_REPEAT);
+
+const starsLine = createRandomLine(120 * 30, '☆' + repeat(' ', 100));
+
+let roadAndCar = '`ō͡≡≡o˞̶ ' + repeat('-', 115);
 const DOT = '.';
 const SPACE = ' ';
-const ROAD = "-~-------~~";
+const ROAD = "-";
 const EMPTYSTRING = '';
 const cloud = '⋆｡°•☁';
 const SCREEN_LENGTH = 126;
-const delayValue = 7;
+const delayValue = 6.5;
+const stoppingPoint = 30;
 
 function randomNumber(from, to) {
   return Math.floor(Math.random() * (to - from)) + from;
@@ -22,11 +34,13 @@ function repeat(char, noOfTimes) {
 }
 
 function slice(string, from, to) {
-  if (from > to) {
-    return EMPTYSTRING;
+  let slicedString = '';
+
+  for (let index = from; index <= to; index++) {
+    slicedString += string[index];
   }
 
-  return string[from] + slice(string, from + 1, to);
+  return slicedString;
 }
 
 function delay(delayValue) {
@@ -37,27 +51,68 @@ function printNewLines(noOfTimes) {
   console.log(repeat('\n', noOfTimes));
 }
 
-function printClouds() {
-  const clouds = createRandomLine(SCREEN_LENGTH, cloud + repeat(' ', 20));
+function printClouds(screenLength) {
+  const clouds = createRandomLine(screenLength, cloud + repeat(' ', 20));
 
   console.log(clouds);
 }
 
-function printMovingCar(stringBeforeCar, car, stringAfterCar) {
-  const track = stringBeforeCar + car + stringAfterCar;
+function bringFirstCharToLast(string) {
+  const endIndex = string.length - 1;
+  const firstChar = string[0];
+  const restOfTheString = slice(string, 1, endIndex);
 
-  console.log(track);
+  return restOfTheString + firstChar;
 }
 
-function printTrack(stringBeforeCar, car, stringAfterCar) {
-  console.clear();
+function bringLastCharToFirst(string) {
+  const endIndex = string.length - 1;
+  const lastChar = string[endIndex];
+  const restOfTheString = slice(string, 0, endIndex - 1);
 
-  printNewLines(30);
-  printClouds();
-  printClouds();
-  printNewLines(1);
+  return lastChar + restOfTheString;
+}
 
-  printMovingCar(stringBeforeCar, car, stringAfterCar);
+function replace(string, char, index) {
+  let replacedString = '';
+
+  for (let increment = 0; increment < string.length; increment++) {
+    const nextChar = increment === index ? char : string[increment];
+    replacedString += nextChar;
+  }
+
+  return replacedString;
+}
+
+function makeLineMoveLeft(line) {
+  const movingLine = bringFirstCharToLast(line);
+
+  console.log(movingLine);
+  return movingLine;
+}
+
+function makeLineMoveRight(line) {
+  return bringLastCharToFirst(line);
+}
+
+function makeGroundFloor(line) {
+  const moveGroundFloor = bringFirstCharToLast(line);
+
+  console.log(repeat(moveGroundFloor + '\n', 4));
+  return moveGroundFloor;
+}
+
+function printMovingBuildingsInFrame() {
+  _frameLine1 = makeLineMoveLeft(_frameLine1);
+  _frameLine2 = makeLineMoveLeft(_frameLine2);
+  _frameLine3 = makeLineMoveLeft(_frameLine3);
+  _frameLine4 = makeLineMoveLeft(_frameLine4);
+  _frameLine5 = makeLineMoveLeft(_frameLine5);
+  _frameLine6 = makeGroundFloor(_frameLine6);
+}
+
+function printStars() {
+  console.log(starsLine);
 }
 
 function getrandomChar(string) {
@@ -92,28 +147,47 @@ function loadingScreen() {
   }
 }
 
-function start(car, delayValue, road, roadLength) {
+function printStillBuilding() {
+  console.log(_frameLine1);
+  console.log(_frameLine2);
+  console.log(_frameLine3);
+  console.log(_frameLine4);
+  console.log(_frameLine5);
+  console.log(_frameLine6);
+  console.log(_frameLine6);
+  console.log(_frameLine6);
+  console.log(_frameLine6 + '\n');
+}
+
+function runTheCar(roadWithCar) {
+  roadAndCar = makeLineMoveRight(roadWithCar);
+
+  console.log(roadAndCar);
+}
+
+
+function start(delayValue,screenLength) {
   loadingScreen();
+  let index = 0;
 
-  let endOfStringBeforeCar = 0;
-  const randomRoad = createRandomLine(roadLength, road);
+  while (true) {
+    console.clear();
 
-  while (endOfStringBeforeCar < randomRoad.length) {
-    const startOfStringAfterCar = endOfStringBeforeCar + CAR.length - 1;
-    const endOfStringAfterCar = roadLength - 1;
+    printStars();
+    printClouds(screenLength);
+    printClouds(screenLength);
 
-    const stringBeforeCar = slice(randomRoad, 0, endOfStringBeforeCar);
-    const stringAfterCar = slice(randomRoad, startOfStringAfterCar, endOfStringAfterCar);
-
-    printTrack(stringBeforeCar, car, stringAfterCar);
-    delay(delayValue);
-
-    endOfStringBeforeCar++;
-
-    if (endOfStringBeforeCar === randomRoad.length - CAR.length) {
-      endOfStringBeforeCar = 0;
+    if (index < stoppingPoint) {
+      printStillBuilding();
+      runTheCar(roadAndCar);
+    } else {
+      printMovingBuildingsInFrame();
+      console.log(roadAndCar);
     }
+    
+    index++;
+    delay(delayValue);
   }
 }
 
-start(CAR, delayValue, ROAD, SCREEN_LENGTH);
+start(delayValue, SCREEN_LENGTH);
